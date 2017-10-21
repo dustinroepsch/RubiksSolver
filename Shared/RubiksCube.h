@@ -21,8 +21,8 @@ enum Color
     Red = Top,
     Blue = Left,
     Green = Right,
-    Black = Back,
-    Yellow = Bottom,
+    Yellow = Back,
+    Orange = Bottom,
     Num_Colors = Num_Sides
 };
 

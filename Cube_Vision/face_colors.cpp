@@ -52,5 +52,34 @@ int face_colors(Mat* face, Color face_colors[3][3])
 
 Color get_color(int bgr[3])
 {
-  return Blue;
+  int i;
+  Color result;
+  int square, best_square;
+  /* Array of expected colors */
+  static int exp_color[(int) Num_Colors][3] =
+  {
+    {200, 200, 200},
+    {  0,   0, 200},
+    {200,   0,   0},
+    {  0, 200,   0},
+    {  0, 200, 200},
+    {  0, 100, 200}
+  };
+
+  best_square = INT_MAX;
+
+  for (i = 0; i < (int) Num_Colors; ++i)
+  {
+    square = (bgr[0]-exp_color[i][0])*(bgr[0]-exp_color[i][0])
+           + (bgr[1]-exp_color[i][1])*(bgr[1]-exp_color[i][1])
+           + (bgr[2]-exp_color[i][2])*(bgr[2]-exp_color[i][2]);
+
+    if (square < best_square)
+    {
+      best_square = square;
+      result = (Color) i;
+    }
+  }
+
+  return result;
 }

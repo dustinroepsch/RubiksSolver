@@ -1,8 +1,12 @@
-CFLAGS=-std=c++11 `pkg-config --cflags --libs opencv`
+CFLAGS=-std=c++11 -Wall `pkg-config --cflags --libs opencv`
 
-all: test_main
+all: solve
 
-test_main: face_finder.o face_affine.o face_colors.o
+solve: main.cpp face_finder.o face_affine.o face_colors.o
+	g++ main.cpp *.o -o $@ $(CFLAGS)
+
+
+test_main: test_main.cpp face_finder.o face_affine.o face_colors.o
 	g++ test_main.cpp *.o -o $@ $(CFLAGS)
 
 face_finder.o: face_finder.cpp
