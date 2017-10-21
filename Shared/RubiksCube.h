@@ -48,6 +48,9 @@ class Rubiks_Cube
     const static Color solved_state[Num_Sides][3][3]; 
 
     private:
+
+    friend class Sub_Problem;
+    
     static void rotate_face_counter_clockwise(Color face[3][3]);
     static void rotate_face_clockwise(Color face[3][3]);
 
