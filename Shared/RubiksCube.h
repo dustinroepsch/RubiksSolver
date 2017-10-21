@@ -43,7 +43,7 @@ class Rubiks_Cube
     Rotations are clockwise, Prime Rotations are counter clockwise
     */
     sp_rubiks_cube_t rotate_side(Side face) const;
-    //sp_rubiks_cube_t rotate_sidePrime(Side face) const;
+    sp_rubiks_cube_t rotate_sidePrime(Side face) const;
 
     const static Color solved_state[Num_Sides][3][3]; 
 

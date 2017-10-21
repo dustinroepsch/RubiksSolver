@@ -280,3 +280,31 @@ sp_rubiks_cube_t Rubiks_Cube::rotate_side(Side face) const
     std::cout << "Bad things are happening" << std::endl;
     return std::make_shared<Rubiks_Cube>(solved_state);
 }
+
+sp_rubiks_cube_t Rubiks_Cube::rotate_sidePrime(Side face) const
+{
+    switch (face)
+    {
+    case Front:
+        return rotateX(face)->rotateX(face)->rotateX(face);
+    case Back:
+        return rotateX(face);
+
+    case Right:
+        return rotateY(face)->rotateY(face)->rotateY(face);
+    case Left:
+        return rotateY(face);
+
+    case Top:
+        return rotateZ(face)->rotateZ(face)->rotateZ(face);
+
+    case Bottom:
+        return rotateZ(face);
+
+        break;
+    default:
+        assert(false);
+    }
+    std::cout << "Bad things are happening" << std::endl;
+    return std::make_shared<Rubiks_Cube>(solved_state);
+}
