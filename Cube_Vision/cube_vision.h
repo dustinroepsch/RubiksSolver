@@ -6,6 +6,7 @@
 
 /* General defines */
 #define ORIG_OUTPUT  "../images/last_run/1_original.jpg"
+#define NAME_LEN  128
 
 /* Face-finding defines */
 #define HOUGH_OUTPUT  "../images/last_run/2_hough_output.jpg"
