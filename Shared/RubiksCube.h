@@ -58,6 +58,7 @@ class Rubiks_Cube
     static void copy_state(Color destination[Num_Sides][3][3], const Color (&source)[Num_Sides][3][3]);
 
     sp_rubiks_cube_t rotateX(Side face) const;
+    sp_rubiks_cube_t rotateY(Side face) const;    
         
 
     Color current_state[Num_Sides][3][3];
