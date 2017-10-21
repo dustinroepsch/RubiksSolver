@@ -105,31 +105,41 @@ sp_rubiks_cube_t Rubiks_Cube::rotateX(Side face) const
     Color next_state[Num_Sides][3][3];
 
     copy_state(next_state, current_state);
-    rotate_face_clockwise(next_state[face]);
+    if (face == Front)
+    {
+        rotate_face_clockwise(next_state[face]);
+    }
+    else
+    {
+        rotate_face_counter_clockwise(next_state[face]);
+    }
 
     int index = face == Front ? 0 : 2;
+    for (int j = 0; j <= index; j++) //far way side needs to rotate 3 times to be clockwise;
+    {
 
-    //right side
-    for (int i = 0; i < 3; i++)
-    {
-        next_state[Right][i][index] = current_state[Top][2 - index][i];
-    }
+        //right side
+        for (int i = 0; i < 3; i++)
+        {
+            next_state[Right][i][index] = current_state[Top][2 - index][i];
+        }
 
-    //top side
-    for (int i = 0; i < 3; i++)
-    {
-        next_state[Top][2 - index][i] = current_state[Left][2 - i][2 - index];
-    }
+        //top side
+        for (int i = 0; i < 3; i++)
+        {
+            next_state[Top][2 - index][i] = current_state[Left][2 - i][2 - index];
+        }
 
-    //left side
-    for (int i = 0; i < 3; i++)
-    {
-        next_state[Left][2 - i][2 - index] = current_state[Bottom][index][2 - i];
-    }
-    //bottom side
-    for (int i = 0; i < 3; i++)
-    {
-        next_state[Bottom][index][2 - i] = current_state[Right][i][index];
+        //left side
+        for (int i = 0; i < 3; i++)
+        {
+            next_state[Left][2 - i][2 - index] = current_state[Bottom][index][2 - i];
+        }
+        //bottom side
+        for (int i = 0; i < 3; i++)
+        {
+            next_state[Bottom][index][2 - i] = current_state[Right][i][index];
+        }
     }
     return std::make_shared<Rubiks_Cube>(next_state);
 }
@@ -141,29 +151,86 @@ sp_rubiks_cube_t Rubiks_Cube::rotateY(Side face) const
     Color next_state[Num_Sides][3][3];
 
     copy_state(next_state, current_state);
-    rotate_face_clockwise(next_state[face]);
+
+    if (face == Right)
+    {
+        rotate_face_clockwise(next_state[face]);
+    }
+    else
+    {
+        rotate_face_counter_clockwise(next_state[face]);
+    }
 
     int index = face == Right ? 0 : 2;
 
-    //top side
-    for (int i = 0; i < 3; i++) {
-        next_state[Top][2 - i][2 - index] = current_state[Front][2 - i][2 - index];
+    for (int j = 0; j <= index; j++)
+    { //far away side needs to rotate 3 times to be clockwise
+
+        //top side
+        for (int i = 0; i < 3; i++)
+        {
+            next_state[Top][2 - i][2 - index] = current_state[Front][2 - i][2 - index];
+        }
+
+        //back
+        for (int i = 0; i < 3; i++)
+        {
+            next_state[Back][i][index] = current_state[Top][2 - i][2 - index];
+        }
+
+        //bottom
+        for (int i = 0; i < 3; i++)
+        {
+            next_state[Bottom][i][2 - index] = current_state[Back][2 - i][index];
+        }
+
+        //front
+        for (int i = 0; i < 3; i++)
+        {
+            next_state[Front][2 - i][2 - index] = current_state[Bottom][2 - i][2 - index];
+        }
+    }
+
+    return std::make_shared<Rubiks_Cube>(next_state);
+}
+sp_rubiks_cube_t Rubiks_Cube::rotateZ(Side face) const
+{
+    assert(face == Top || face == Bottom);
+    Color next_state[Num_Sides][3][3];
+
+    copy_state(next_state, current_state);
+    int index = face == Top ? 0 : 2;
+    if (face == Top)
+    {
+        rotate_face_clockwise(next_state[face]);
+    }
+    else
+    {
+        rotate_face_counter_clockwise(next_state[face]);
     }
 
     //back
-    for (int i = 0; i < 3; i++) {
-        next_state[Back][i][index] =  current_state[Top][2 - i][2 - index];        
+    for (int i = 0; i < 3; i++)
+    {
+        next_state[Back][index][i] = current_state[Left][index][i];
     }
 
-
-    //bottom
-    for (int i = 0; i < 3; i++) {
-       next_state[Bottom][i][2 - index] = current_state[Back][2-i][index];    
+    //right
+    for (int i = 0; i < 3; i++)
+    {
+        next_state[Right][index][i] = current_state[Back][index][i];
     }
 
-    //front
-    for (int i = 0; i < 3; i++) {
-        next_state[Front][2 - i][2 - index] = current_state[Bottom][2-i][2 - index];        
+    //Front
+    for (int i = 0; i < 3; i++)
+    {
+        next_state[Front][index][i] = current_state[Right][index][i];
+    }
+
+    //left
+    for (int i = 0; i < 3; i++)
+    {
+        next_state[Left][index][i] = current_state[Front][index][i];
     }
 
     return std::make_shared<Rubiks_Cube>(next_state);
@@ -195,14 +262,17 @@ sp_rubiks_cube_t Rubiks_Cube::rotate_side(Side face) const
     switch (face)
     {
     case Front:
-    case Back:
         return rotateX(face);
-    case Left:
+    case Back:
+        return rotateX(face)->rotateX(face)->rotateX(face);
     case Right:
         return rotateY(face);
-        break;
+    case Left:
+        return rotateY(face)->rotateY(face)->rotateY(face);
     case Top:
+        return rotateZ(face);
     case Bottom:
+        return rotateZ(face)->rotateZ(face)->rotateZ(face);
         break;
     default:
         assert(false);

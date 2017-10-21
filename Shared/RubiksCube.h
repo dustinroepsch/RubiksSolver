@@ -59,6 +59,7 @@ class Rubiks_Cube
 
     sp_rubiks_cube_t rotateX(Side face) const;
     sp_rubiks_cube_t rotateY(Side face) const;    
+    sp_rubiks_cube_t rotateZ(Side face) const;
         
 
     Color current_state[Num_Sides][3][3];
