@@ -6,10 +6,10 @@
 enum Side
 {
     Front = 0,
-    Back,
+    Top,
     Left,
     Right,
-    Top,
+    Back,
     Bottom,
     Num_Sides
 };
@@ -36,7 +36,7 @@ class Rubiks_Cube
   public:
     Rubiks_Cube(const Color (&state)[Num_Sides][3][3]);
 
-    static void print_face(Side face);
+    void print_face(Side face) const;
     void print_cube() const;
 
     /*
@@ -45,13 +45,7 @@ class Rubiks_Cube
     sp_rubiks_cube_t rotate_side(Side face) const;
     //sp_rubiks_cube_t rotate_sidePrime(Side face) const;
 
-    static const Color solved_state[Num_Sides][3][3] = {
-        {
-            {Front, Front, Front},
-            {Front, Front, Front},
-            {Front, Front, Front}
-        }
-    }
+    const static Color solved_state[Num_Sides][3][3]; 
 
     private:
     static void rotate_face_counter_clockwise(Color face[3][3]);

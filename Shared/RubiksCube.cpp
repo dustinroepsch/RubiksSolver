@@ -2,11 +2,44 @@
 #include <iostream>
 #include <cassert>
 
+const Color Rubiks_Cube::solved_state[Num_Sides][3][3] = {
+    {
+        {White, White, White},
+        {White, White, White},
+        {White, White, White}
+    },
+    {
+        {Red, Red, Red},
+        {Red, Red, Red},
+        {Red, Red, Red}
+    },
+    {
+        {Blue, Blue, Blue},
+        {Blue, Blue, Blue},
+        {Blue, Blue, Blue}
+    },
+    {
+        {Green, Green, Green},
+        {Green, Green, Green},
+        {Green, Green, Green}
+    },
+    {
+        {Black, Black, Black},
+        {Black, Black, Black},
+        {Black, Black, Black}
+    },
+    {
+        {Yellow, Yellow, Yellow},
+        {Yellow, Yellow, Yellow},
+        {Yellow, Yellow, Yellow}
+    },
+};
+
 Rubiks_Cube::Rubiks_Cube(const Color (&state)[Num_Sides][3][3]) {
     copy_state(current_state, state);
 }
 
-void Rubiks_Cube::print_face(Side face) {
+void Rubiks_Cube::print_face(Side face) const {
     for (int row = 0; row < 3; row++) {
         for (int col = 0; col < 3; col++) {
             std::cout << current_state[face][row][col] << " ";
@@ -18,7 +51,6 @@ void Rubiks_Cube::print_face(Side face) {
 
 void Rubiks_Cube::transpose_face(Color face[3][3]) {
     Color stupid_copy[3][3];
-    std::cout << "this is happening" << std::endl;
     for (int row = 0; row < 3; row++) {
         for (int col = 0; col < 3; col++) {
             stupid_copy[row][col] = face[col][row];
@@ -107,7 +139,7 @@ void Rubiks_Cube::print_cube() const {
     print_face(Top);
 
     std::cout << "Bottom" << std::endl;
-    print_face(Front);
+    print_face(Bottom);
     
     std::cout << "Back" << std::endl;
     print_face(Back);
@@ -127,6 +159,8 @@ sp_rubiks_cube_t Rubiks_Cube::rotate_side(Side face) const {
         case Bottom:
         break;
         default:
-        assert(("Should Never Get Here", false)); //horrible abuse of the comma operator but I think I'm clever so it's okay also this is a hackathon
+        assert(false);      
     }
+    std::cout << "Bad things are happening" << std::endl;
+    return std::make_shared<Rubiks_Cube>(solved_state);
 }
