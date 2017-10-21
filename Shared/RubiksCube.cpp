@@ -1,14 +1,9 @@
 #include "RubiksCube.h"
 #include <iostream>
+#include <cassert>
 
 Rubiks_Cube::Rubiks_Cube(const Color (&state)[Num_Sides][3][3]) {
-    for (int side = 0; side < Num_Sides; side++) {
-        for (int row = 0; row < 3; row++) {
-            for (int col = 0; col < 3; col++) {
-                current_state[side][row][col] = state[side][row][col];
-            }
-        }
-    }
+    copy_state(current_state, state);
 }
 
 void Rubiks_Cube::print_face(Side face) {
@@ -57,3 +52,59 @@ void Rubiks_Cube::rotate_face_counter_clockwise(Color face[3][3]) {
     
 }
 
+void Rubiks_Cube::copy_state(Color destination[Num_Sides][3][3], const Color (&source)[Num_Sides][3][3]) {
+    for (int side = 0; side < Num_Sides; side++) {
+        for (int row = 0; row < 3; row++) {
+            for (int col = 0; col < 3; col++) {
+                destination[side][row][col] = source[side][row][col];
+            }
+        }
+    }
+}
+
+sp_rubiks_cube_t Rubiks_Cube::rotateX(Side face) const {
+    assert(face == Front || face == Back);
+
+    Color next_state[Num_Sides][3][3];
+
+    copy_state(next_state, current_state);
+    rotate_face_clockwise(next_state[face]);
+
+    int index = face == Front ? 0 : 2;
+    
+    //right side
+    for (int i = 0; i < 3; i++) {
+        next_state[Right][i][index] = current_state[top][2 - index][i];
+    }
+
+    //top side
+    for (int i = 0; i < 3; i++) {
+        next_state[top][2 - index][i] =  current_state[Left][2 - i][2 - index];        
+    }
+
+    //left side
+    for (int i = 0; i < 3; i++) {
+        next_state[Left][2 - i][2 - index] = current_state[Bottom][index][2 - i];
+    }
+    //bottom side
+    for (int i = 0; i < 3; i++) {
+        next_state[Bottom][index][2 - i] = current_state[Right][i][index];        
+    }
+
+}
+
+sp_rubiks_cube_t Rubiks_Cube::rotate_side(Side face) const {
+    switch (face) {
+        case Front:
+        case Back:
+            return rotateX(face);
+        case Left:
+        case Right:
+        break;
+        case Top:
+        case Bottom:
+        break;
+        default:
+        assert(("Should Never Get Here", false)); //horrible abuse of the comma operator but I think I'm clever so it's okay also this is a hackathon
+    }
+}
