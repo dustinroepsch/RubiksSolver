@@ -74,12 +74,12 @@ sp_rubiks_cube_t Rubiks_Cube::rotateX(Side face) const {
     
     //right side
     for (int i = 0; i < 3; i++) {
-        next_state[Right][i][index] = current_state[top][2 - index][i];
+        next_state[Right][i][index] = current_state[Top][2 - index][i];
     }
 
     //top side
     for (int i = 0; i < 3; i++) {
-        next_state[top][2 - index][i] =  current_state[Left][2 - i][2 - index];        
+        next_state[Top][2 - index][i] =  current_state[Left][2 - i][2 - index];        
     }
 
     //left side
@@ -90,8 +90,30 @@ sp_rubiks_cube_t Rubiks_Cube::rotateX(Side face) const {
     for (int i = 0; i < 3; i++) {
         next_state[Bottom][index][2 - i] = current_state[Right][i][index];        
     }
-
+    return std::make_shared<Rubiks_Cube>(next_state);
 }
+
+void Rubiks_Cube::print_cube() const {
+    std::cout << "Front" << std::endl;
+    print_face(Front);
+
+    std::cout << "Left" << std::endl;
+    print_face(Left);
+
+    std::cout << "Right" << std::endl;
+    print_face(Right);
+
+    std::cout << "Top" << std::endl;
+    print_face(Top);
+
+    std::cout << "Bottom" << std::endl;
+    print_face(Front);
+    
+    std::cout << "Back" << std::endl;
+    print_face(Back);
+    
+}
+
 
 sp_rubiks_cube_t Rubiks_Cube::rotate_side(Side face) const {
     switch (face) {
