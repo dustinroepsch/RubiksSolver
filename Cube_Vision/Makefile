@@ -2,7 +2,7 @@ CFLAGS=-std=c++11 -Wall `pkg-config --cflags --libs opencv`
 
 all: solve
 
-solve: main.cpp face_finder.o face_affine.o face_colors.o
+solve: main.cpp face_finder.o face_affine.o face_colors.o RubiksCube.o
 	g++ main.cpp *.o -o $@ $(CFLAGS)
 
 test_main: test_main.cpp face_finder.o face_affine.o face_colors.o
