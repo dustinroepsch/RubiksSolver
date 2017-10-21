@@ -15,12 +15,12 @@ const Color Rubiks_Cube::solved_state[Num_Sides][3][3] = {
     {{Green, Green, Green},
      {Green, Green, Green},
      {Green, Green, Green}},
-    {{Black, Black, Black},
-     {Black, Black, Black},
-     {Black, Black, Black}},
     {{Yellow, Yellow, Yellow},
      {Yellow, Yellow, Yellow},
      {Yellow, Yellow, Yellow}},
+    {{Orange, Orange, Orange},
+     {Orange, Orange, Orange},
+     {Orange, Orange, Orange}},
 };
 
 Rubiks_Cube::Rubiks_Cube(const Color (&state)[Num_Sides][3][3])
