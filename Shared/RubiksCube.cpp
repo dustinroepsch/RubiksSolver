@@ -344,7 +344,7 @@ std::vector<sp_rubiks_cube_t> Rubiks_Cube::successors() {
 }
 
 int search(std::shared_ptr<std::deque<sp_rubiks_cube_t>> path, int g, int bound, std::unordered_map<std::shared_ptr<Sub_Problem>,int, Sub_Problem_Hasher, Sub_Problem_EqualFn> &h) {
-    std::cout << path->size() << std::endl;
+   // std::cout << path->size() << std::endl;
     sp_rubiks_cube_t node = path->back();
     int f = g + h[std::make_shared<Sub_Problem>(*node)];
     if (f > bound) return f;
