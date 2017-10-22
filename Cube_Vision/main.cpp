@@ -61,10 +61,11 @@ int main(int argc, char* argv[])
   
   num_steps = rubik->solve(steps);
 
-  for (i = 0; i < num_steps; ++i)
+  cout << "Number of required steps: " << num_steps << endl;
+
+  for (i = 0; i < num_steps; ++ i)
   {
-    cout << "Move " << (i + 1) << ": Turn the " << face_names[steps[i > 0 ? i : -i]][0]
-         << " face " << directions[i > 0 ? 0 : 1]; << endl;
+    printf("%d: Turn the %s face %s\n", (i + 1), face_names[(steps[i] > 0 ? steps[i] : -steps[i]) - 1][0], directions[steps[i] > 0 ? 0 : 1]);
   }
 
   return 0;

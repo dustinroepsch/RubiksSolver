@@ -426,7 +426,7 @@ int Rubiks_Cube::solve(int moves[20]) {
     heuristic_file.open("heurstics.txt");
     std::string line;
     while (std::getline(heuristic_file, line)) {
-    //    std::cout << line <<std::endl;
+        //std::cout << line <<std::endl;
         std::istringstream iss(line);
         int n;
         Color colors[Num_Sides][2][2];
