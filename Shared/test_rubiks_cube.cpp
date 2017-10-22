@@ -1,6 +1,6 @@
 #include "RubiksCube.h"
 #include <iostream>
-
+#include <vector>
 int main()
 {
     //front up front right bottom left bottom back
@@ -32,5 +32,10 @@ int main()
     std::cout << "Turn Back:" << std::endl;
     cube = cube->rotate_side(Back);
     cube->print_cube();
+
+    std::shared_ptr<std::vector<std::string>> solutions = cube->solve();
+    for (std::string str : *solutions ){
+        std::cout << str << std::endl;
+    }   
     return 0;
 }

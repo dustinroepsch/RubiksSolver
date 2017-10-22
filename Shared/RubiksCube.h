@@ -39,6 +39,19 @@ class Rubiks_Cube
     void print_face(Side face) const;
     void print_cube() const;
 
+    inline bool operator==(const Rubiks_Cube &other) {
+        for (int side = 0; side < Num_Sides; side++) {
+            for (int row = 0; row < 3; row++) {
+                for (int col = 0; col < 3; col++) {
+                    if (this->current_state[side][row][col] != other.current_state[side][row][col]) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
     /*
     Rotations are clockwise, Prime Rotations are counter clockwise
     */
@@ -47,7 +60,17 @@ class Rubiks_Cube
 
     const static Color solved_state[Num_Sides][3][3]; 
 
+    std::shared_ptr<std::vector<std::string>> solve(); //kill me for that return type
+
+    static bool is_goal(sp_rubiks_cube_t n);
+
+    std::vector<sp_rubiks_cube_t> successors();
+    
+
     private:
+
+    friend class Sub_Problem;
+    
     static void rotate_face_counter_clockwise(Color face[3][3]);
     static void rotate_face_clockwise(Color face[3][3]);
 

@@ -1,6 +1,16 @@
 #include "RubiksCube.h"
 #include <iostream>
 #include <cassert>
+#include <iostream>
+#include <fstream>
+#include <unordered_map>
+#include <sstream>
+#include <deque>
+#include <climits>
+#include "SubProblem.h"
+
+#define FOUND -2
+#define N0T_FOUND -1
 
 const Color Rubiks_Cube::solved_state[Num_Sides][3][3] = {
     {{White, White, White},
@@ -307,4 +317,134 @@ sp_rubiks_cube_t Rubiks_Cube::rotate_sidePrime(Side face) const
     }
     std::cout << "Bad things are happening" << std::endl;
     return std::make_shared<Rubiks_Cube>(solved_state);
+}
+
+bool Rubiks_Cube::is_goal(sp_rubiks_cube_t n) {
+    for (int side = 0; side < Num_Sides; side++) {
+        for (int row = 0; row < 3; row++) {
+            for (int col = 0; col < 3; col++) {
+                if ( n->current_state[side][row][col] != solved_state[side][row][col]) {
+                    return false;
+                }
+            }
+        }
+    }
+    return true;
+}
+
+std::vector<sp_rubiks_cube_t> Rubiks_Cube::successors() {
+    std::vector<sp_rubiks_cube_t> list;
+
+    for (int side = 0; side < Num_Sides; side++) {
+        list.push_back(this->rotate_side(Side(side)));
+        list.push_back(this->rotate_sidePrime(Side(side)));
+    }
+
+    return list;
+}
+
+int search(std::shared_ptr<std::deque<sp_rubiks_cube_t>> path, int g, int bound, std::unordered_map<std::shared_ptr<Sub_Problem>,int, Sub_Problem_Hasher, Sub_Problem_EqualFn> &h) {
+    std::cout << path->size() << std::endl;
+    sp_rubiks_cube_t node = path->back();
+    int f = g + h[std::make_shared<Sub_Problem>(*node)];
+    if (f > bound) return f;
+    if (Rubiks_Cube::is_goal(node)) {
+        return FOUND;
+    }
+    int min = INT_MAX;
+    for (sp_rubiks_cube_t succ : node->successors()) {
+        if (std::find(path->begin(), path->end(), succ) ==  path->end()) {
+            path->push_back(succ);
+            int t = search(path, g + 1, bound, h);
+            if (t == FOUND) return FOUND;
+            if (t < min) {
+                min = t;
+            }
+            path->pop_back();
+        }
+    }
+    return min;
+}
+
+std::string get_color(int s) {
+    switch(s) {
+        case Front:
+            return "White";
+        case Top:
+            return "Red";
+        case Left:
+            return "Blue"; 
+        case Right:
+            return "Green";
+        case Back:
+            return "Yellow";
+        case Bottom:
+            return "Orange";
+        default:
+        return "What????11";
+    }
+
+}
+
+std::shared_ptr<std::vector<std::string>> path_to_strings(std::shared_ptr<std::deque<sp_rubiks_cube_t>> path) {
+    std::shared_ptr<std::vector<std::string>> list = std::make_shared<std::vector<std::string>>();
+    for (int i = 0; i + 1 < path->size(); i++) {
+        for (int side = 0; side < Num_Sides; side++) {
+            if (*((*path)[i]->rotate_side(Side(side))) == *((*path)[i + 1])) {
+                list->push_back(get_color(side) + " clockwise");
+            }
+            if (*((*path)[i]->rotate_sidePrime(Side(side))) == *((*path)[i + 1])) {
+                list->push_back(get_color(side) + " counter-clockwise");
+            }
+        }
+    }
+    return list;
+}
+
+std::shared_ptr<std::vector<std::string>> ida_star(std::shared_ptr<Rubiks_Cube> root, std::unordered_map<std::shared_ptr<Sub_Problem>,int, Sub_Problem_Hasher, Sub_Problem_EqualFn> &h) {
+    std::shared_ptr<std::deque<sp_rubiks_cube_t>> path = std::make_shared<std::deque<sp_rubiks_cube_t>>();
+    int bound = h[std::make_shared<Sub_Problem>(*root)];
+    path->push_back(root);
+    for (;;) {
+        int t = search(path, 0, bound, h);
+        if (t == FOUND) {
+            return path_to_strings(path);
+        }
+        if (t == INT_MAX) {
+            return std::make_shared<std::vector<std::string>>();
+        }
+        bound = t;
+    }
+}
+
+std::shared_ptr<std::vector<std::string>> Rubiks_Cube::solve() {
+    std::unordered_map<std::shared_ptr<Sub_Problem>,int, Sub_Problem_Hasher, Sub_Problem_EqualFn> heuristic;
+    
+    std::cout << "Starting to read file" << std::endl;
+
+    std::ifstream heuristic_file;
+    heuristic_file.open("heurstics.txt");
+    std::string line;
+    while (std::getline(heuristic_file, line)) {
+    //    std::cout << line <<std::endl;
+        std::istringstream iss(line);
+        int n;
+        Color colors[Num_Sides][2][2];
+        for (int side = 0; side < Num_Sides; side++) {
+            for (int row = 0; row < 2; row++) {
+                for (int col = 0; col < 2; col++) {
+                    iss >> n;
+                    colors[side][row][col] = Color(n);
+                }
+            }
+        }
+        iss >> n;
+
+        heuristic[std::make_shared<Sub_Problem>(colors)] = n;
+
+    }
+    std::cout << "Read Heuristic File" << std::endl;
+    heuristic_file.close();
+    std::shared_ptr<Rubiks_Cube> root = std::make_shared<Rubiks_Cube> (this->current_state);
+    return ida_star(root, heuristic);
 }
