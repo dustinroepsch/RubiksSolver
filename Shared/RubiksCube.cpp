@@ -386,38 +386,38 @@ std::string get_color(int s) {
 
 }
 
-std::shared_ptr<std::vector<std::string>> path_to_strings(std::shared_ptr<std::deque<sp_rubiks_cube_t>> path) {
+int path_to_strings(std::shared_ptr<std::deque<sp_rubiks_cube_t>> path, int moves[20] ) {
     std::shared_ptr<std::vector<std::string>> list = std::make_shared<std::vector<std::string>>();
     for (int i = 0; i + 1 < path->size(); i++) {
         for (int side = 0; side < Num_Sides; side++) {
             if (*((*path)[i]->rotate_side(Side(side))) == *((*path)[i + 1])) {
-                list->push_back(get_color(side) + " clockwise");
+                moves[i] = (side + 1);
             }
             if (*((*path)[i]->rotate_sidePrime(Side(side))) == *((*path)[i + 1])) {
-                list->push_back(get_color(side) + " counter-clockwise");
+                moves[i] = -(side + 1);
             }
         }
     }
-    return list;
+    return path->size() - 1;
 }
 
-std::shared_ptr<std::vector<std::string>> ida_star(std::shared_ptr<Rubiks_Cube> root, std::unordered_map<std::shared_ptr<Sub_Problem>,int, Sub_Problem_Hasher, Sub_Problem_EqualFn> &h) {
+int ida_star(std::shared_ptr<Rubiks_Cube> root, std::unordered_map<std::shared_ptr<Sub_Problem>,int, Sub_Problem_Hasher, Sub_Problem_EqualFn> &h, int moves[20]) {
     std::shared_ptr<std::deque<sp_rubiks_cube_t>> path = std::make_shared<std::deque<sp_rubiks_cube_t>>();
     int bound = h[std::make_shared<Sub_Problem>(*root)];
     path->push_back(root);
     for (;;) {
         int t = search(path, 0, bound, h);
         if (t == FOUND) {
-            return path_to_strings(path);
+            return path_to_strings(path, moves);
         }
         if (t == INT_MAX) {
-            return std::make_shared<std::vector<std::string>>();
+            return 0;
         }
         bound = t;
     }
 }
 
-std::shared_ptr<std::vector<std::string>> Rubiks_Cube::solve() {
+int Rubiks_Cube::solve(int moves[20]) {
     std::unordered_map<std::shared_ptr<Sub_Problem>,int, Sub_Problem_Hasher, Sub_Problem_EqualFn> heuristic;
     
     std::cout << "Starting to read file" << std::endl;
@@ -446,5 +446,5 @@ std::shared_ptr<std::vector<std::string>> Rubiks_Cube::solve() {
     std::cout << "Read Heuristic File" << std::endl;
     heuristic_file.close();
     std::shared_ptr<Rubiks_Cube> root = std::make_shared<Rubiks_Cube> (this->current_state);
-    return ida_star(root, heuristic);
+    return ida_star(root, heuristic, moves);
 }
