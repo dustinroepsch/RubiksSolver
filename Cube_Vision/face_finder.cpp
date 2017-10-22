@@ -5,10 +5,10 @@
 #define DX(LINE) ((LINE)[2] - (LINE)[0])
 #define DY(LINE) ((LINE)[3] - (LINE)[1])
 
-#define THRESH       70
-#define GAUSS_KER     3
-#define MIN_LINE_LEN 10
-#define MAX_LINE_GAP  3
+#define THRESH       50
+#define GAUSS_KER     7 
+#define MIN_LINE_LEN 15
+#define MAX_LINE_GAP 20 
 #define SLOPE_TOL   0.1
 
 /* Function to run probabilistic Hough, and output result with drawn lines */
@@ -41,9 +41,9 @@ int face_finder(Mat* image, int corner_coords[3][2])
   double slope;
 
   /* Blur the image to favor outer edges? */
-  //GaussianBlur(*image, smoothed, Size(GAUSS_KER, GAUSS_KER), 0, 0);
-  //bilateralFilter(*image, smoothed, 10, 20, -1);
-  blur(*image, smoothed, Size(3, 3));
+  GaussianBlur(*image, smoothed, Size(GAUSS_KER, GAUSS_KER), 0, 0);
+  //bilateralFilter(*image, smoothed, 20, 120, -1);
+  //blur(*image, smoothed, Size(3, 3));
   imwrite(SMOOTH_OUTPUT, smoothed); 
 
   /* Convert image to grayscale */

@@ -4,6 +4,7 @@
 #include "../Shared/RubiksCube.h"
 #include <iostream>
 #include <cstdio>
+#include <vector>
 
 /* General defines */
 #define ORIG_OUTPUT  "../images/last_run/1_original.jpg"

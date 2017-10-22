@@ -30,9 +30,10 @@ int main(int argc, char* argv[])
   for(face = 0; face < 6; ++face)
   {
     cout << "Next face: " << face_names[face][0] << ","
-         <<  "with " << face_names[face][1] << " above." << endl;
+         << " with " << face_names[face][1] << " above." << endl;
     cout << "Please enter the path/filename of the image:" << endl;
-    cin >> filename;
+    //cin >> filename;
+    sprintf(filename, "../final/f%d.jpg", face + 1);
 
     /* Read, resize and store original image */
     original = imread(filename);
@@ -52,6 +53,9 @@ int main(int argc, char* argv[])
   }
 
   rubik = make_shared<Rubiks_Cube>(cube);
+
+  for (string str : *(rubik->solve()))
+    cout << str << endl;
 
   return 0;
 }
