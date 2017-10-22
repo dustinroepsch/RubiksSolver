@@ -38,7 +38,8 @@ int main(int argc, char* argv[])
     original = imread(filename);
 
     /* Run algorithm on image of one face */
-    one_face(&original, square_colors);
+    one_face(&original, square_colors, 0);
+    square_colors[1][1] = (Color) face;
 
     /* Assign face to cube array */
     for(i = 0; i < 3; ++i)

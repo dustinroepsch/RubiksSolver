@@ -5,11 +5,17 @@
 #define DX(LINE) ((LINE)[2] - (LINE)[0])
 #define DY(LINE) ((LINE)[3] - (LINE)[1])
 
+#define THRESH       70
+#define GAUSS_KER     3
+#define MIN_LINE_LEN 10
+#define MAX_LINE_GAP  3
+#define SLOPE_TOL   0.1
+
 /* Function to run probabilistic Hough, and output result with drawn lines */
 void PHough(Mat* edges, int thresh, const string output_name, Mat* phough, int* num_lines, int best_lines[MAX_LINES][4]);
 
 /* Given a set of lines (some roughly horizonatal, some roughly vertical), find horizontal (dy/dx) slope */
-double horizontal_slope(int lines[MAX_LINES][4], int num_lines);
+double horizontal_slope(int lines[MAX_LINES][4], int* num_lines);
 
 /* Given the set of lines and a slope, finds the top-left, top-right, and bottom-right corners */
 void find_corners(int lines[MAX_LINES][4], int num_lines, double slope, int width, int height, int corners[3][2]);
@@ -18,6 +24,8 @@ void find_corners(int lines[MAX_LINES][4], int num_lines, double slope, int widt
 int face_finder(Mat* image, int corner_coords[3][2])
 {
   int i;
+  /* Smoothed input */
+  Mat smoothed;
   /* Grayscale copy of input */
   Mat image_gs;
   /* Edge-detection output */
@@ -32,11 +40,14 @@ int face_finder(Mat* image, int corner_coords[3][2])
   /* Slope (dy/dx) of roughly horizontal axis */
   double slope;
 
-  /* Convert image to grayscale */
-  cvtColor(*image, image_gs, COLOR_RGB2GRAY);
-
   /* Blur the image to favor outer edges? */
-  GaussianBlur(image_gs, image_gs, Size(GAUSS_KER, GAUSS_KER), 0, 0);
+  //GaussianBlur(*image, smoothed, Size(GAUSS_KER, GAUSS_KER), 0, 0);
+  //bilateralFilter(*image, smoothed, 10, 20, -1);
+  blur(*image, smoothed, Size(3, 3));
+  imwrite(SMOOTH_OUTPUT, smoothed); 
+
+  /* Convert image to grayscale */
+  cvtColor(smoothed, image_gs, COLOR_RGB2GRAY);
 
   /* Run edge detection and Hough */
   Canny(image_gs, edges, 50, 200, 3);
@@ -49,7 +60,7 @@ int face_finder(Mat* image, int corner_coords[3][2])
   }
 
   /* Find slope of "horizontal" cube axis */
-  slope = horizontal_slope(long_lines, num_lines);
+  slope = horizontal_slope(long_lines, &num_lines);
 
   /* Find three necessary corner points */
   find_corners(long_lines, num_lines, slope, edges.cols, edges.rows, corner_coords);
@@ -84,7 +95,7 @@ void PHough(Mat* edges, int thresh, const string output_name, Mat* phough, int* 
 
   /* convert back to color and run Hough */
   cvtColor(*edges, *phough, COLOR_GRAY2BGR);
-  HoughLinesP(*edges, p_lines, 1, CV_PI/180, thresh, 30, 10 );
+  HoughLinesP(*edges, p_lines, 1, CV_PI/360, thresh, MIN_LINE_LEN, MAX_LINE_GAP);
 
   /* sort lines by length */
   sort(p_lines.begin(), p_lines.end(),
@@ -102,7 +113,7 @@ void PHough(Mat* edges, int thresh, const string output_name, Mat* phough, int* 
   for( size_t i = 0; (int)i < *num_lines; i++ )
      {
        Vec4i l = p_lines[i];
-       line(*phough, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(255,0,0), 3, LINE_AA);
+       line(*phough, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(0,0,255), 7, LINE_AA);
        /* store x1, y1, x2, y2, respectively */
        best_lines[i][0] = l[0];
        best_lines[i][1] = l[1];
@@ -114,17 +125,19 @@ void PHough(Mat* edges, int thresh, const string output_name, Mat* phough, int* 
    imwrite(output_name, *phough);
 }
 
-double horizontal_slope(int lines[MAX_LINES][4], int num_lines)
+double horizontal_slope(int lines[MAX_LINES][4], int* num_lines)
 {
   double horz, vert;
   int num_horz, num_vert;
   int i;
+  int remove;
 
   /* Initialize variables for sum */
   horz = vert = 0.0;
   num_horz = num_vert = 0;
 
-  for (i = 0; i < num_lines; ++i)
+  /* Initially compute line counts and slope values */
+  for (i = 0; i < *num_lines; ++i)
   {
     if (ABS(DX(lines[i])) > ABS(DY(lines[i])))
     {
@@ -140,15 +153,60 @@ double horizontal_slope(int lines[MAX_LINES][4], int num_lines)
     }
   }
 
+#if DEBUG
+  printf("H: %lf, num_horz: %d\n", horz, num_horz);
+  printf("V: %lf, num_vert: %d\n", vert, num_vert);
+#endif
+
+  /* Average all slopes */
+  horz /= num_horz;
+  vert /= num_vert;
+
+  /* Check for and remove outlying lines */
+  for (i = 0; i < *num_lines; ++i)
+  {
+    remove = 0;
+
+    if (ABS(DX(lines[i])) > ABS(DY(lines[i])))
+    {
+      /* Remove horizontal outliers */
+      if (ABS(horz - DY(lines[i]) / (double) DX(lines[i])) > SLOPE_TOL)
+      {
+        horz -= DY(lines[i]) / (double) DX(lines[i]) / num_horz;
+        if (num_horz > 1)
+          horz *= (num_horz) / (double) (num_horz - 1);
+        num_horz--;
+        remove = 1;
+      }
+    }
+    else 
+    {
+      /* Remove vertical outliers */
+      if (ABS(vert - DX(lines[i]) / (double) DY(lines[i])) > SLOPE_TOL)
+      {
+        vert -= DX(lines[i]) / (double) DY(lines[i]) / num_vert;
+        if (num_vert > 1)
+          vert *= (num_vert) / (double) (num_vert - 1);
+        num_vert--;
+        remove = 1;
+      }
+    }
+
+    if (remove)
+    {
+      lines[i][0] = lines[*num_lines - 1][0];
+      lines[i][1] = lines[*num_lines - 1][1];
+      lines[i][2] = lines[*num_lines - 1][2];
+      lines[i][3] = lines[*num_lines - 1][3];
+      --(*num_lines);
+    }
+  }
+
   if (!num_vert || !num_horz)
   {
     fprintf(stderr, "Error: Only one direction of line found!\n");
     return 2;
   }
-
-  /* Average all slopes */
-  horz /= num_horz;
-  vert /= num_vert;
 
 #if DEBUG
   /* Are slopes perpendicular? */

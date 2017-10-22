@@ -3,7 +3,7 @@
 
 Color get_color(int bgr[3]);
 
-int face_colors(Mat* face, Color face_colors[3][3])
+int face_colors(Mat* face, Color face_colors[3][3], int calibrate)
 {
   /* row/column of rubik's cube face */
   int row, col;
@@ -15,11 +15,14 @@ int face_colors(Mat* face, Color face_colors[3][3])
   int const S = 3;
   /* BGR values of face cells */
   int face_bgr[3][3][3];
-
-#if CALIBRATE
+  /* Image of isolated samples */
+  Mat isolated;
   /* We need a generic iterator variable for calibration */
   int i;
-#endif
+
+  /* Blur input image; prepare isolated sample output */
+  blur(*face, *face, Size(8, 8));
+  isolated = Mat::zeros(face->rows, face->cols, face->type());
 
   /* For each of the three rows of squares */
   for (row = 0; row < S; ++row)
@@ -42,8 +45,24 @@ int face_colors(Mat* face, Color face_colors[3][3])
 
       /* Convert BGR to enum color for this square */
       face_colors[row][col] = get_color(face_bgr[row][col]);
+
+      /* Add circle to isolated output image */
+      circle(
+          isolated,
+          Point(x, y),
+          15,
+          Scalar(
+            face_bgr[row][col][0],
+            face_bgr[row][col][1],
+            face_bgr[row][col][2]
+          ),
+          -1
+      );
     }
   }
+
+  /* Save output image */
+  imwrite(COLOR_OUTPUT, isolated);
 
 #if DEBUG
   /* Print color for debugging */
@@ -61,23 +80,23 @@ int face_colors(Mat* face, Color face_colors[3][3])
   }
 #endif
 
-#if CALIBRATE
-  /* Print the calibration .h file */
-  printf("int const exp_color[6][3] = \n{\n");
-  for (i = 0; i < 6; ++i)
-  {
-    row = i / 3;
-    col = i % 3;
-    printf(
-        "  { %3d, %3d, %3d}%c\n",
-        face_bgr[row][col][0],
-        face_bgr[row][col][1],
-        face_bgr[row][col][2],
-        i != 5 ? ',' : ' '
-    );
+  if (calibrate){
+    /* Print the calibration .h file */
+    printf("int const exp_color[6][3] = \n{\n");
+    for (i = 0; i < 6; ++i)
+    {
+      row = i / 3;
+      col = i % 3;
+      printf(
+          "  { %3d, %3d, %3d}%c\n",
+          face_bgr[row][col][0],
+          face_bgr[row][col][1],
+          face_bgr[row][col][2],
+          i != 5 ? ',' : ' '
+          );
+    }
+    printf("};\n");
   }
-  printf("};\n");
-#endif
 
   return 0;
 }
@@ -87,19 +106,10 @@ Color get_color(int bgr[3])
   int i;
   Color result;
   int square, best_square;
-  /* Array of expected colors */
-/*  static int exp_color[(int) Num_Colors][3] =
-  {
-    {200, 200, 200},
-    {  0,   0, 200},
-    {200,   0,   0},
-    {  0, 200,   0},
-    {  0, 200, 200},
-    {  0, 100, 200}
-  };*/
 
   best_square = INT_MAX;
 
+  /* Find distance to each of the calibrated colors */
   for (i = 0; i < (int) Num_Colors; ++i)
   {
     square = (bgr[0]-exp_color[i][0])*(bgr[0]-exp_color[i][0])

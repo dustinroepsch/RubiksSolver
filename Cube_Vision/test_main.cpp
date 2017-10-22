@@ -18,7 +18,7 @@ int main(int argc, char* argv[])
   original = imread(argv[1]);
 
   /* Run the complete one-face vision algorithm on this image */
-  one_face(&original, square_colors);
+  one_face(&original, square_colors, CALIBRATE);
 
   return 0;
 }
