@@ -1,4 +1,5 @@
 #include "cube_vision.h"
+#include "calibration.h"
 
 Color get_color(int bgr[3]);
 
@@ -14,6 +15,11 @@ int face_colors(Mat* face, Color face_colors[3][3])
   int const S = 3;
   /* BGR values of face cells */
   int face_bgr[3][3][3];
+
+#if CALIBRATE
+  /* We need a generic iterator variable for calibration */
+  int i;
+#endif
 
   /* For each of the three rows of squares */
   for (row = 0; row < S; ++row)
@@ -36,8 +42,15 @@ int face_colors(Mat* face, Color face_colors[3][3])
 
       /* Convert BGR to enum color for this square */
       face_colors[row][col] = get_color(face_bgr[row][col]);
+    }
+  }
 
-      /* Print color for debugging */
+#if DEBUG
+  /* Print color for debugging */
+  for (row = 0; row < S; ++row)
+  {
+    for (col = 0; col < S; ++col)
+    {
       printf("(%3d, %3d, %3d), ",
           (int) face_bgr[row][col][0],
           (int) face_bgr[row][col][1],
@@ -46,6 +59,25 @@ int face_colors(Mat* face, Color face_colors[3][3])
     }
     printf("\b\b\n");
   }
+#endif
+
+#if CALIBRATE
+  /* Print the calibration .h file */
+  printf("int const exp_color[6][3] = \n{\n");
+  for (i = 0; i < 6; ++i)
+  {
+    row = i / 3;
+    col = i % 3;
+    printf(
+        "  { %3d, %3d, %3d}%c\n",
+        face_bgr[row][col][0],
+        face_bgr[row][col][1],
+        face_bgr[row][col][2],
+        i != 5 ? ',' : ' '
+    );
+  }
+  printf("};\n");
+#endif
 
   return 0;
 }
@@ -56,7 +88,7 @@ Color get_color(int bgr[3])
   Color result;
   int square, best_square;
   /* Array of expected colors */
-  static int exp_color[(int) Num_Colors][3] =
+/*  static int exp_color[(int) Num_Colors][3] =
   {
     {200, 200, 200},
     {  0,   0, 200},
@@ -64,7 +96,7 @@ Color get_color(int bgr[3])
     {  0, 200,   0},
     {  0, 200, 200},
     {  0, 100, 200}
-  };
+  };*/
 
   best_square = INT_MAX;
 

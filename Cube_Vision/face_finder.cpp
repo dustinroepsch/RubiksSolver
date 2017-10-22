@@ -65,18 +65,15 @@ int face_finder(Mat* image, int corner_coords[3][2])
         Scalar(255 * (i == 0), 255 * (i == 1), 255 * (i == 2)),
         10
     );
-    printf("Point %d: (%d, %d)\n", i, corner_coords[i][0], corner_coords[i][1]);
-  }
-  imwrite(CORNER_OUTPUT, corners);
 
-  /*
-  corner_coords[0][0] = 320;
-  corner_coords[0][1] = 245;
-  corner_coords[1][0] = 495;
-  corner_coords[1][1] = 330;
-  corner_coords[2][0] = 497;
-  corner_coords[2][1] = 552;
-  */
+#if DEBUG
+    /* Print what points are found for debugging */
+    printf("Point %d: (%d, %d)\n", i, corner_coords[i][0], corner_coords[i][1]);
+#endif
+  }
+
+  /* Save image with labeled corners */
+  imwrite(CORNER_OUTPUT, corners);
 
   return 0;
 }
@@ -153,9 +150,11 @@ double horizontal_slope(int lines[MAX_LINES][4], int num_lines)
   horz /= num_horz;
   vert /= num_vert;
 
-  /* DEBUG: are slopes perpendicular? */
+#if DEBUG
+  /* Are slopes perpendicular? */
   printf("Horizontal: %lf\n", horz);
   printf("  Vertical: %lf\n", vert);
+#endif
 
   return horz;
 }
@@ -184,13 +183,15 @@ void find_corners(int lines[MAX_LINES][4], int num_lines, double slope, int widt
 
   /* LEFT and RIGHT are scored with photo x-intercept when extrapolated along the cube y-axis (-1/slope) */
   /* TOP AND BOTTOM are scored with photo y-intercept when extrapolated along the cube x-axis (slope) */
-left  = x_intcpt(best_left[0],  best_left[1],  slope);
-right = x_intcpt(best_right[0], best_right[1], slope);
-top   = y_intcpt(best_top[0],   best_top[1],   slope);
-bot   = y_intcpt(best_bot[0],   best_bot[1],   slope);
+  left  = x_intcpt(best_left[0],  best_left[1],  slope);
+  right = x_intcpt(best_right[0], best_right[1], slope);
+  top   = y_intcpt(best_top[0],   best_top[1],   slope);
+  bot   = y_intcpt(best_bot[0],   best_bot[1],   slope);
 
+#if DEBUG
   printf("Number of lines we have: %d\n", num_lines);
   printf("Our horizontal slope is %lf\n", slope);
+#endif
 
   /* For each line segment */
   for (i = 0; i < num_lines; ++i)
@@ -201,7 +202,10 @@ bot   = y_intcpt(best_bot[0],   best_bot[1],   slope);
       x_int = x_intcpt(lines[i][j + 0], lines[i][j + 1], slope);
       y_int = y_intcpt(lines[i][j + 0], lines[i][j + 1], slope);
 
+#if DEBUG
+      /* Print all points and their respective Cartesian intercepts when debugging */
       printf("(%4d, %4d) -> x_int: %8.2lf, y_int: %8.2lf\n", lines[i][j + 0], lines[i][j + 1], x_int, y_int);
+#endif
 
       /* Check if a new extreme left has been found */
       if (x_int < left)
@@ -239,10 +243,13 @@ bot   = y_intcpt(best_bot[0],   best_bot[1],   slope);
     }
   }
 
+#if DEBUG
+  /* Print intercept extrema after checking all points */
+  printf("(left, right, top, bot) = (%lf, %lf, %lf, %lf)\n", left, right, top, bot);
+#endif
+
   /* Build the final three points: top-left, top-right, and bottom-right */
   /* These are points where the intercepts match the optimal */
-
-  printf("(left, right, top, bot) = (%lf, %lf, %lf, %lf)\n", left, right, top, bot);
 
   /* Top-Left corner, x then y */
   corners[0][0] = (int) ((left - slope * top)/(1 + slope*slope));

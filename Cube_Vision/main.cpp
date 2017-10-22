@@ -17,10 +17,6 @@ int main(int argc, char* argv[])
   int i, j, face;
   /* Input image */
   Mat original;
-  /* Other images */
-  Mat finder_input, affine_input, affine_output;
-  /* (x,y) for each of 3 corners */
-  int corner_coords[3][2];
   /* Row-major matrix of colors on face */
   Color square_colors[3][3];
   /* Array for cube initializer */
@@ -38,35 +34,21 @@ int main(int argc, char* argv[])
     cout << "Please enter the path/filename of the image:" << endl;
     cin >> filename;
 
-    /* Read an store original image */
+    /* Read, resize and store original image */
     original = imread(filename);
-    imwrite(ORIG_OUTPUT, original);
 
-    /* Copy input to be used later */ 
-    finder_input = original.clone();
-    affine_input = original.clone();
+    /* Run algorithm on image of one face */
+    one_face(&original, square_colors);
 
-    /* Find the face in the image */
-    face_finder(&finder_input, corner_coords);
-
-    /* Affine tranform the face to a square image */
-    face_affine(&affine_input, corner_coords, &affine_output);
-
-    /* Sample face image to get square colors */
-    face_colors(&affine_output, square_colors);
-
+    /* Assign face to cube array */
     for(i = 0; i < 3; ++i)
     {
       for (j = 0; j < 3; ++j)
       {
         cube[face][i][j] = square_colors[i][j];
-        cout << square_colors[i][j] << " ";
       }
-      cout << endl;
     }
   }
-
-  cout << cube;
 
   rubik = make_shared<Rubiks_Cube>(cube);
 

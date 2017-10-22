@@ -3,10 +3,13 @@
 #include "opencv2/imgproc.hpp"
 #include "../Shared/RubiksCube.h"
 #include <iostream>
+#include <cstdio>
 
 /* General defines */
 #define ORIG_OUTPUT  "../images/last_run/1_original.jpg"
 #define NAME_LEN  128
+#define DEBUG 0
+#define CALIBRATE 0
 
 /* Face-finding defines */
 #define HOUGH_OUTPUT  "../images/last_run/2_hough_output.jpg"
@@ -22,6 +25,8 @@
 
 using namespace cv;
 using namespace std;
+
+int one_face(Mat* image, Color face[3][3]);
 
 int face_finder(Mat* image, int corner_coords[3][2]);
 
