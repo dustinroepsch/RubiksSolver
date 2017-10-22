@@ -13,7 +13,7 @@ int one_face(Mat* image, Color face[3][3], int calibrate)
   imwrite(ORIG_OUTPUT, *image);
 
   /* Make image smaller for easier computation */
-  resize(*image, small, Size(1000, 1000));
+  resize(*image, small, Size(1000, 1000*image->rows/image->cols));
 
   /* Find the face in the image */
   face_finder(&small, corner_coords);

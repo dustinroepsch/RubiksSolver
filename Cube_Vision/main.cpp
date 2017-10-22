@@ -12,6 +12,9 @@ static char const * const face_names[6][2] =
   {"Orange", "White"}
 };
 
+static char const* const directions[2] =
+  {"Clockwise", "Counter-clockwise"};
+
 int main(int argc, char* argv[])
 {
   int i, j, face;
@@ -25,6 +28,8 @@ int main(int argc, char* argv[])
   char filename[NAME_LEN];
   /* Rubik's cube data structure */
   sp_rubiks_cube_t rubik;
+  /* Solution */
+  int num_steps, steps[20];
 
   /* Store each face */
   for(face = 0; face < 6; ++face)
@@ -33,7 +38,7 @@ int main(int argc, char* argv[])
          << " with " << face_names[face][1] << " above." << endl;
     cout << "Please enter the path/filename of the image:" << endl;
     //cin >> filename;
-    sprintf(filename, "../final/f%d.jpg", face + 1);
+    sprintf(filename, "../b/f%d.jpg", face + 1);
 
     /* Read, resize and store original image */
     original = imread(filename);
@@ -53,9 +58,14 @@ int main(int argc, char* argv[])
   }
 
   rubik = make_shared<Rubiks_Cube>(cube);
+  
+  num_steps = rubik->solve(steps);
 
-  for (string str : *(rubik->solve()))
-    cout << str << endl;
+  for (i = 0; i < num_steps; ++i)
+  {
+    cout << "Move " << (i + 1) << ": Turn the " << face_names[steps[i > 0 ? i : -i]][0]
+         << " face " << directions[i > 0 ? 0 : 1]; << endl;
+  }
 
   return 0;
 }

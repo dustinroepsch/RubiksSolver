@@ -1,4 +1,4 @@
-CFLAGS=-std=c++11 -Wall -ggdb -O3 `pkg-config --cflags --libs opencv`
+CFLAGS=-std=c++11 -Wall -O2 `pkg-config --cflags --libs opencv`
 
 all: solve
 
