@@ -1,17 +1,16 @@
 #include "SubProblem.h"
 
 #include "RubiksCube.h"
+#include <iostream>
 
 bool only_red_white_or_blue(Color a, Color b, Color c) {
     return (a == Red || a == White || a == Blue) &&
            (b == Red || b == White || b == Blue) &&
-           (c == Red || c == White || c == Blue) &&
+           (c == Red || c == White || c == Blue);
 }
 
-Sub_Problem::Sub_Problem(const Color (&large_problem)[Num_Sides][3][3]) {
-    sp_rubiks_cube_t cube = std::make_shared<Rubiks_Cube>(large_problem);
-
-    int z, x, y;
+Sub_Problem::Sub_Problem(const Rubiks_Cube &in_cube) {
+    sp_rubiks_cube_t cube = std::make_shared<Rubiks_Cube>(in_cube.current_state);
 
     //check bottom half of cube
    
@@ -37,19 +36,23 @@ Sub_Problem::Sub_Problem(const Color (&large_problem)[Num_Sides][3][3]) {
     }
 
     if (need_to_flip_cube_upside_down) {
+       // std::cout << "flipped" << std::endl;        
         cube = cube->rotate_side(Right)->rotate_side(Right)->rotate_sidePrime(Left)->rotate_sidePrime(Left);
     }
 
     while(!only_red_white_or_blue(cube->current_state[Front][0][0], cube->current_state[Left][0][2], cube->current_state[Top][2][0])) {
-        cube = cube->rotate_side(Top)->rotate_side(Top)->rotate_sidePrime(Bottom)->rotate_sidePrime(Bottom);
+        //cube->print_cube();
+        //std::cout << std::endl;
+        cube = cube->rotate_side(Top)->rotate_sidePrime(Bottom);
+
     }
 
     while(cube->current_state[Top][2][0] != Red) {
-        cube = cube->rotate_side(Left)->rotate_side(Left)->rotate_sidePrime(Right)->rotate_sidePrime(Right);
-        cube = cube->rotate_side(Front)->rotate_side(Front)->rotate_sidePrime(Back)->rotate_sidePrime(Back);
+        cube = cube->rotate_side(Left)->rotate_sidePrime(Right);
+        cube = cube->rotate_side(Front)->rotate_sidePrime(Back);
     }
 
-    for (int side = i; i < Num_Sides; i++) {
+    for (int side = 0; side < Num_Sides; side++) {
         colors[side][0][0] = cube->current_state[side][0][0];
         colors[side][0][1] = cube->current_state[side][0][2];
         colors[side][1][0] = cube->current_state[side][2][0];
