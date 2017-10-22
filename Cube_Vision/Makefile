@@ -1,12 +1,18 @@
-CFLAGS=-std=c++11 -Wall `pkg-config --cflags --libs opencv`
+CFLAGS=-std=c++11 -Wall -ggdb -O3 `pkg-config --cflags --libs opencv`
 
 all: solve
 
-solve: main.cpp face_finder.o face_affine.o face_colors.o RubiksCube.o
-	g++ main.cpp *.o -o $@ $(CFLAGS)
+solve: main.cpp one_face.o RubiksCube.o SubProblem.o
+	g++ main.cpp *.o -D CALIBRATE=0 -o $@ $(CFLAGS)
 
-test_main: test_main.cpp face_finder.o face_affine.o face_colors.o
-	g++ test_main.cpp *.o -o $@ $(CFLAGS)
+calibrate: FORCE test_main.cpp one_face.o
+	g++ test_main.cpp *.o -D CALIBRATE=1 -o $@ $(CFLAGS)
+
+test_main: test_main.cpp one_face.o
+	g++ test_main.cpp *.o -D CALIBRATE=0 -o $@ $(CFLAGS)
+
+one_face.o: one_face.cpp face_finder.o face_affine.o face_colors.o
+	g++ one_face.cpp -c $(CFLAGS)
 
 face_finder.o: face_finder.cpp
 	g++ face_finder.cpp -c $(CFLAGS)
@@ -19,6 +25,11 @@ face_colors.o: face_colors.cpp
 
 RubiksCube.o: ../Shared/RubiksCube.cpp ../Shared/RubiksCube.h
 	g++ ../Shared/RubiksCube.cpp -c $(CFLAGS)
+
+SubProblem.o: ../Shared/SubProblem.cpp
+	g++ ../Shared/SubProblem.cpp -c $(CFLAGS)
+
+FORCE:
 
 clean:
 	rm -f *.o

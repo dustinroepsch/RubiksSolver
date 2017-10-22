@@ -4,5 +4,6 @@ images/
 a.out
 Cube_Vision/test_main
 Cube_Vision/solve
+Cube_Vision/calibrate
 Cube_Vision/*.o
 heurstics.txt

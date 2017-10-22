@@ -2,6 +2,7 @@
 #define RUBIKS_CUBE_H
 
 #include <memory>
+#include <vector>
 
 enum Side
 {
