@@ -6,23 +6,47 @@
 
 int main()
 {
-    //front up front right bottom left bottom back
-    sp_rubiks_cube_t cube = std::make_shared<Rubiks_Cube>(Rubiks_Cube::solved_state);
-    srand(time(NULL));
-
-    for (int i = 0; i < 10; i++) {
-        int side = rand() % Num_Sides;
-        bool clockwise = rand() % 2;
-        if (clockwise) {
-            cube = cube->rotate_side(Side(side));
-        } else {
-            cube = cube->rotate_sidePrime(Side(side));
+    Color input[Num_Colors][3][3] = {
+        {
+            {Blue, Yellow, Orange},
+            {Blue, White, Green},
+            {Red, White, Orange}
+        },
+        {
+            {Green, Green, Orange},
+            {Yellow, Red, Orange},
+            {Yellow, Green, Green}            
+        },
+        {
+            {White, Orange, Orange},
+            {Red, Blue, Red},
+            {White, White, Green}
+        },
+        {
+            {Yellow, White, Green},
+            {White, Green, Green},
+            {Blue, Yellow, Yellow}
+        },
+        {
+            {White, Red, Red},
+            {Orange, Yellow, Yellow},
+            {Red, Blue, Red}
+        },
+        {
+            {Yellow, Red, White},
+            {Blue, Orange, Blue},
+            {Blue, Orange, Blue}            
         }
-    }
-
-    std::shared_ptr<std::vector<std::string>> solutions = cube->solve();
-    for (std::string str : *solutions ){
-        std::cout << str << std::endl;
+    };
+    //front up front right bottom left bottom back
+    sp_rubiks_cube_t cube = std::make_shared<Rubiks_Cube>(input);
+    cube->print_cube();
+    int path[20];
+    int solutions = cube->solve(path);
+    for (int i = 0; i < solutions; i++){
+        std::cout << path[i] << std::endl;
     }   
+
+    
     return 0;
 }

@@ -61,7 +61,7 @@ class Rubiks_Cube
 
     const static Color solved_state[Num_Sides][3][3]; 
 
-    std::shared_ptr<std::vector<std::string>> solve(); //kill me for that return type
+    int solve(int moves[20]); //kill me for that return type
 
     static bool is_goal(sp_rubiks_cube_t n);
 
